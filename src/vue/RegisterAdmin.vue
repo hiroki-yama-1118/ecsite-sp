@@ -190,7 +190,7 @@ export default defineComponent({
        * 会員情報を登録する
        */
       const response = await axios.post(
-        `http://153.127.48.168:8080/ecsite-api/user`,
+        `https://153.127.48.168:8080/ecsite-api/user`,
         {
           name: firstName.value + " " + lastName.value,
           email: mail.value,

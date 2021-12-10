@@ -89,7 +89,7 @@ export default defineComponent({
 
       //ログイン情報を送る
       const response = await axios.post(
-        `http://153.127.48.168:8080/ecsite-api/user/login`,
+        `https://153.127.48.168:8080/ecsite-api/user/login`,
         {
           email: mailAddress.value,
           password: passWord.value,

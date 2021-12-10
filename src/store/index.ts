@@ -67,13 +67,12 @@ export default createStore({
     fromCartListOff(state) {
       state.fromCartList = false;
     },
-
   },
   actions: {
     //外部APIから情報を取得し、payloadとしてmutationsにわたす
     async getItemList(context) {
       const response = await axios.get(
-        `http://153.127.48.168:8080/ecsite-api/item/items/noodle`
+        `https://153.127.48.168:8080/ecsite-api/item/items/noodle`
       );
       console.dir("response:" + JSON.stringify(response));
       const payload = response.data;
