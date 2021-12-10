@@ -1,7 +1,9 @@
 <template>
   <div class="top-wrapper">
-    注文完了画面
-    <button type="button" v-on:click="onReItemList">商品一覧に戻る</button>
+    <h1>注文完了画面</h1>
+    <button type="button" class="btn" v-on:click="onReItemList">
+      商品一覧に戻る
+    </button>
   </div>
 </template>
 

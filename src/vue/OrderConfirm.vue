@@ -176,18 +176,86 @@
         </div>
         <h2>お支払い方法</h2>
         <label>
-          <input type="radio" name="payment" v-model="cash" value="cash" /><span
-            >現金払い</span
-          >
+          <input
+            type="radio"
+            name="payment"
+            v-model="paymentMethod"
+            value="cash"
+            v-on:change="openCredit"
+            checked
+          /><span>現金払い</span>
         </label>
         <label>
           <input
             type="radio"
             name="payment"
-            v-model="credit"
+            v-model="paymentMethod"
             value="credit"
+            v-on:change="openCredit"
           /><span>クレジットカード</span>
         </label>
+        <!-- クレジット決済画面 -->
+        <div class="credit-card" v-if="isCredit">
+          <h3>クレジットカード情報</h3>
+
+          <div class="row">
+            <div class="error">
+              {{ creditCardError }}
+            </div>
+            <div class="input-field col s10">
+              <div class="error">{{ cardNumberError }}</div>
+              <label for="cardNumber">カード番号：</label>
+              <input type="text" v-model="cardNumber" id="cardNumber" />
+            </div>
+            <div class="select-field col s10">
+              <div class="error">{{ cardExpError }}</div>
+              <label for="cardExpMonth">有効期限：</label>
+              <select
+                name=""
+                id="cardExpMonth"
+                class="browser-default col s4"
+                v-model="cardExpMonth"
+              >
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option></select
+              >月
+              <select
+                name=""
+                id=""
+                class="browser-default col s4"
+                v-model="cardExpYear"
+              >
+                <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option></select
+              >年
+            </div>
+
+            <div class="input-field col s10">
+              <div class="error">{{ cardNameError }}</div>
+              <label for="cardName">カード名義</label>
+              <input type="text" id="cardName" v-model="cardName" />
+            </div>
+            <div class="input-field col s10">
+              <div class="error">{{ cvvError }}</div>
+              <label for="css">セキュリティーコード</label>
+              <input type="text" id="css" v-model="cvv" />
+            </div>
+          </div>
+        </div>
+
         <!-- モーダル表示 -->
         <div id="app">
           <div>
@@ -214,14 +282,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import { OrderItem } from "../types/orderItem";
 import { useStore } from "vuex";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { format } from "date-fns";
-import { de } from "date-fns/locale";
 import addHours from "date-fns/esm/addHours";
+import { User } from "@/types/user";
+import { ca } from "date-fns/locale";
 // import { User } from "../types/user";
 
 export default defineComponent({
@@ -266,6 +334,34 @@ export default defineComponent({
     const deliveryDate = ref("");
     //配達時間
     const deliveryTime = ref("");
+    //クレジット決済情報画面
+    const isCredit = ref(false);
+    //現金払い
+    const cash = ref("");
+    //クレジット払い
+    const credit = ref("");
+    //クレジットカード番号
+    const cardNumber = ref("");
+    //クレジットカード番号のエラー
+    const cardNumberError = ref("");
+    //クレジットカード名義
+    const cardName = ref("");
+    //クレジットカード名義エラー
+    const cardNameError = ref("");
+    //有効期限（月）
+    const cardExpMonth = ref("");
+    //有効期限エラー
+    const cardExpError = ref("");
+    //有効期限（年）
+    const cardExpYear = ref("");
+    //セキュリティーコード
+    const cvv = ref("");
+    //セキュリティーコードエラー
+    const cvvError = ref("");
+    //カード情報不正エラー
+    const creditCardError = ref("");
+    //支払い方法
+    const paymentMethod = ref("cash");
 
     //カートに入っている商品情報をストアから取得
     const getCurrentCartItem = () => {
@@ -291,6 +387,16 @@ export default defineComponent({
       address.value = currentUserAddress.address;
     };
     getAddless();
+
+    //クレジット決済画面表示
+    const openCredit = () => {
+      if (paymentMethod.value === "credit") {
+        isCredit.value = true;
+      } else if (paymentMethod.value === "cash") {
+        isCredit.value = false;
+        return;
+      }
+    };
 
     /**
      * 住所検索機能
@@ -339,11 +445,8 @@ export default defineComponent({
       let nowTime = new Date();
       console.log(nowTime);
       if (daliveryDateTime < addHours(nowTime, 3)) {
-        console.log("おおおおおお");
         console.log(addHours(nowTime, 3));
         errorDeliveryDate.value = "今から３時間後の時間を指定してください";
-        console.log("かかかかっか");
-
         return;
       }
     };
@@ -351,11 +454,36 @@ export default defineComponent({
     /**
      * 注文を確定するボタンをクリック
      */
-    const openModal = () => {
+    const openModal = async (): Promise<void> => {
+      console.log("クレジット決済呼ばれる");
       //エラーがあれば先に進まない
       if (hasError()) {
         return;
       }
+      //クレジットカード決済
+      if (paymentMethod.value === "credit") {
+        console.log("クレジット決済呼ばれる２２２２２２２");
+        let loginUser = store.getters.getUserAddress;
+        const responce = await axios.post(
+          "http://153.127.48.168:8080/sample-credit-card-web-api/credit-card/payment",
+          {
+            user_id: loginUser.id,
+            amount: totalPriceInTax.value,
+            card_number: cardNumber.value,
+            card_exp_month: cardExpMonth.value,
+            card_exp_year: cardExpYear.value,
+            card_name: cardName.value,
+            card_cvv: cvv.value,
+          }
+        );
+        console.dir("responce:" + JSON.stringify(responce));
+        if (responce.data.status === "error") {
+          console.log("エラー表示");
+          creditCardError.value = "クレジットカード情報が不正です";
+          return;
+        }
+      }
+
       //入力した日付情報を取得
       let deliveryDates = new Date(deliveryDate.value);
       //指定した時間情報を取得
@@ -375,6 +503,7 @@ export default defineComponent({
       //注文完了画面に画面遷移する
       showContent.value = true;
     };
+
     //モーダル画面から注文完了画面に遷移
     const onOrder = () => {
       router.push("/orderFinished");
@@ -414,9 +543,63 @@ export default defineComponent({
         errorDeliveryDate.value = "時間を指定してください";
         noAddress.value = true;
       }
+
+      //クレジットカードのエラー表示
+      if (paymentMethod.value === "credit") {
+        creditCardError.value = "";
+        cardNameError.value = "";
+        cardNumberError.value = "";
+        cardExpError.value = "";
+        cvvError.value = "";
+
+        let cardNumberPattern = /^[0-9]{14,16}$/;
+        if (cardNumber.value === "") {
+          cardNumberError.value = "カード番号を入力してください";
+          noAddress.value = true;
+        }
+        //クレジットカード番号の桁数のエラー
+        else if (cardNumberPattern.test(cardNumber.value) === false) {
+          cardNumberError.value =
+            "クレジットカード番号は14~16桁で入力してください";
+          noAddress.value = true;
+        }
+
+        //有効期限のエラー
+        let nowDate = new Date();
+        let cardDate = new Date(
+          Number(cardExpYear.value),
+          Number(cardExpMonth.value)
+        );
+        if (cardExpMonth.value === "" || cardExpYear.value === "") {
+          cardExpError.value = "クレジットカードの有効期限を入力してください";
+          noAddress.value = true;
+        } else if (nowDate > cardDate) {
+          cardExpError.value = "クレジットカードの有効期限が切れています";
+          noAddress.value = true;
+        }
+        let cardNamePattern = /[A-Z]{1,50}$/;
+        if (cardName.value === "") {
+          cardNameError.value = "クレジットカード名義を入力してください";
+          noAddress.value = true;
+        } else if (cardNamePattern.test(cardName.value) === false) {
+          cardNameError.value =
+            "クレジットカード名義は半角英数字で50文字以内で入力してください";
+          noAddress.value = true;
+        }
+        let cvvPattern = /^[0-9]{3,4}$/;
+        if (cvv.value === "") {
+          cvvError.value = "セキュリティーコードを入力してください";
+          noAddress.value = true;
+        } else if (cvvPattern.test(cvv.value) === false) {
+          cvvError.value =
+            "セキュリティーコードは半角英数字で3または4桁で入力してください";
+          noAddress.value = true;
+        }
+      }
       if (noAddress.value === true) {
         showContent.value = false;
       }
+
       return noAddress.value;
     };
 
@@ -446,12 +629,31 @@ export default defineComponent({
       getDate,
       deliveryDate,
       deliveryTime,
+      openCredit,
+      credit,
+      cash,
+      isCredit,
+      cardNumber,
+      cardExpMonth,
+      cardExpYear,
+      cardName,
+      cvv,
+      paymentMethod,
+      creditCardError,
+      cardNameError,
+      cardNumberError,
+      cardExpError,
+      cvvError,
     };
   },
 });
 </script>
 
 <style scoped>
+div.payjs-outer {
+  border: thin solid #198fcc;
+}
+
 #overlay {
   /* 要素を重ねたときの順番 */
   z-index: 1;
@@ -517,7 +719,16 @@ export default defineComponent({
   padding: 50px;
   border-radius: 5%;
 }
+.credit-card {
+  background-color: rgb(237, 233, 233);
+  margin: 50px;
+  padding: 50px;
+  border-radius: 5%;
+}
 .error {
   color: red;
+}
+.select-field {
+  display: flex;
 }
 </style>
