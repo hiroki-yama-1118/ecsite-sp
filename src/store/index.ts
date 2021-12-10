@@ -72,7 +72,7 @@ export default createStore({
     //外部APIから情報を取得し、payloadとしてmutationsにわたす
     async getItemList(context) {
       const response = await axios.get(
-        `https://153.127.48.168:8080/ecsite-api/item/items/noodle`
+        `http://153.127.48.168:8080/ecsite-api/item/items/noodle`
       );
       console.dir("response:" + JSON.stringify(response));
       const payload = response.data;

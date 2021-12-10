@@ -23,7 +23,7 @@ export default defineComponent({
     const logout = async (): Promise<void> => {
       store.commit("inLogout");
       //ログアウトするまで画面遷移せず
-      await axios.post("https://153.127.48.168:8080/ecsite-api/user/logout");
+      await axios.post("http://153.127.48.168:8080/ecsite-api/user/logout");
       router.push("/itemList");
     };
     logout();

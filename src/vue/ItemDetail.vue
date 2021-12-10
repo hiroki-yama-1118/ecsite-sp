@@ -156,7 +156,7 @@ export default defineComponent({
     const getItemDetail = async (): Promise<void> => {
       const itemId = route.params.id;
       const response = await axios.get(
-        `https://153.127.48.168:8080/ecsite-api/item/${itemId}`
+        `http://153.127.48.168:8080/ecsite-api/item/${itemId}`
       );
       console.dir("response" + JSON.stringify(response));
       currentItem.value = new Item(

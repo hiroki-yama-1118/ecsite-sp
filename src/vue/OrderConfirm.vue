@@ -108,45 +108,68 @@
           <div class="row order-confirm-delivery-datetime">
             <div class="input-field col s12">
               <div class="error">{{ errorDeliveryDate }}</div>
-              <input type="date" id="deliveryDate" /><label for="deliveryDate">
-                配達日時：</label
-              >
+              <input
+                type="date"
+                id="deliveryDate"
+                v-model="deliveryDate"
+              /><label for="deliveryDate"> 配達日時：</label>
             </div>
             <div>
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="10" /><span
-                  >10時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="10"
+                  v-model="deliveryTime"
+                /><span>10時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="11" /><span
-                  >11時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="11"
+                  v-model="deliveryTime"
+                /><span>11時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="12" /><span
-                  >12時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="12"
+                  v-model="deliveryTime"
+                /><span>12時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="13" /><span
-                  >13時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="13"
+                  v-model="deliveryTime"
+                /><span>13時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="14" /><span
-                  >14時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="14"
+                  v-model="deliveryTime"
+                /><span>14時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="15" /><span
-                  >15時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="15"
+                  v-model="deliveryTime"
+                /><span>15時</span></label
               >
               <label class="order-confirm-delivery-time">
-                <input type="radio" name="deliveryTime" value="16" /><span
-                  >16時</span
-                ></label
+                <input
+                  type="radio"
+                  name="deliveryTime"
+                  value="16"
+                  v-model="deliveryTime"
+                /><span>16時</span></label
               >
             </div>
           </div>
@@ -196,7 +219,10 @@ import { OrderItem } from "../types/orderItem";
 import { useStore } from "vuex";
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { User } from "../types/user";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import addHours from "date-fns/esm/addHours";
+// import { User } from "../types/user";
 
 export default defineComponent({
   setup() {
@@ -236,6 +262,10 @@ export default defineComponent({
     const noAddress = ref(false);
     //配達日時のエラー
     const errorDeliveryDate = ref("");
+    //配達日時
+    const deliveryDate = ref("");
+    //配達時間
+    const deliveryTime = ref("");
 
     //カートに入っている商品情報をストアから取得
     const getCurrentCartItem = () => {
@@ -288,13 +318,70 @@ export default defineComponent({
         zipcodeError.value = "存在しない番号です";
       }
     };
+
     //モーダル画面を閉じる
     const closeModal = () => {
       showContent.value = false;
     };
+    //日付情報を取得
+    const getDate = () => {
+      console.log("getDate呼ばれた");
+      let deliveryDates = new Date(deliveryDate.value);
+      let daliveryDateTime = new Date(
+        deliveryDates.getFullYear(),
+        deliveryDates.getMonth(),
+        deliveryDates.getDate(),
+        Number(deliveryTime.value)
+      );
+      console.log(deliveryDates);
+      console.log(daliveryDateTime);
 
+      let nowTime = new Date();
+      console.log(nowTime);
+      if (daliveryDateTime < addHours(nowTime, 3)) {
+        console.log("おおおおおお");
+        console.log(addHours(nowTime, 3));
+        errorDeliveryDate.value = "今から３時間後の時間を指定してください";
+        console.log("かかかかっか");
+
+        return;
+      }
+    };
+
+    /**
+     * 注文を確定するボタンをクリック
+     */
     const openModal = () => {
-      //お届け先情報にエラーがある場合はエラー表示
+      //エラーがあれば先に進まない
+      if (hasError()) {
+        return;
+      }
+      //入力した日付情報を取得
+      let deliveryDates = new Date(deliveryDate.value);
+      //指定した時間情報を取得
+      let daliveryDateTime = new Date(
+        deliveryDates.getFullYear(),
+        deliveryDates.getMonth(),
+        deliveryDates.getDate(),
+        Number(deliveryTime.value)
+      );
+      //今日の日付情報を取得
+      let nowTime = new Date();
+      //今から3時間後でなければエラー表示
+      if (daliveryDateTime < addHours(nowTime, 3)) {
+        errorDeliveryDate.value = "今から３時間後の時間を指定してください";
+        return;
+      }
+      //注文完了画面に画面遷移する
+      showContent.value = true;
+    };
+    //モーダル画面から注文完了画面に遷移
+    const onOrder = () => {
+      router.push("/orderFinished");
+    };
+
+    //お届け先情報にエラーがある場合はエラー表示
+    const hasError = (): boolean => {
       noAddress.value = false;
       errorName.value = "";
       errorEmail.value = "";
@@ -323,16 +410,16 @@ export default defineComponent({
         errorTell.value = "電話番号を入力してください";
         noAddress.value = true;
       }
+      if (deliveryTime.value === "" || deliveryDate.value === "") {
+        errorDeliveryDate.value = "時間を指定してください";
+        noAddress.value = true;
+      }
       if (noAddress.value === true) {
         showContent.value = false;
-      } else {
-        //注文完了画面に画面遷移する
-        showContent.value = true;
       }
+      return noAddress.value;
     };
-    const onOrder = () => {
-      router.push("/orderFinished");
-    };
+
     return {
       address,
       searchAddress,
@@ -356,6 +443,9 @@ export default defineComponent({
       errorAddress,
       errorTell,
       errorDeliveryDate,
+      getDate,
+      deliveryDate,
+      deliveryTime,
     };
   },
 });
