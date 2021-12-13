@@ -6,23 +6,27 @@
     <div class="header-right">
       <router-link to="/ecsite">
         <i class="fas"></i>
-        TOP
+        TOP｜
       </router-link>
-      ｜
+
       <router-link to="/registerAdmin">
         <i class="fas"></i>
-        会員登録
+        会員登録｜
       </router-link>
-      ｜
+
       <router-link to="/itemList">
         <i class="fas"></i>
-        商品一覧</router-link
+        商品一覧｜</router-link
       >
-      ｜
-      <router-link to="/shoppingCart"> <i class="fas"></i>カート</router-link>
-      ｜
+
+      <router-link to="/shoppingCart"> <i class="fas"></i>カート｜</router-link>
+
       <router-link to="/login" v-bind:key="log" v-if="!isLogin">
-        <i class="fas"></i>ログイン</router-link
+        <i class="fas"></i>ログイン｜</router-link
+      >
+
+      <router-link to="/mypage" v-bind:key="log" v-if="isLogin">
+        <i class="fas"></i>マイページ｜</router-link
       >
 
       <!-- モーダル表示 -->
@@ -143,5 +147,4 @@ export default defineComponent({
 .btn {
   margin: 5px;
 }
-
 </style>

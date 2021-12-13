@@ -2,6 +2,7 @@ import axios from "axios";
 import { createStore } from "vuex";
 import { Item } from "@/types/item";
 import { OrderItem } from "@/types/orderItem";
+// import { Order } from "@/types/order";
 
 export default createStore({
   state: {
@@ -59,6 +60,10 @@ export default createStore({
     deleteItem(state, payload) {
       state.itemsInCarts.splice(payload, 1);
     },
+    //カートの商品をリセットする
+    emptyCart(state) {
+      state.itemsInCarts.splice(0);
+    },
     //ショッピングカートからログイン画面に行くときにtureにする
     fromCartList(state) {
       state.fromCartList = true;
@@ -104,6 +109,10 @@ export default createStore({
     //カートからログイン画面に遷移したかどうかのフラグ
     getFromCartList(state) {
       return state.fromCartList;
+    },
+    //カートの中身をリセットする
+    getEmptyCart(state) {
+      return state.itemsInCarts;
     },
   },
 });

@@ -49,6 +49,10 @@ const routes: Array<RouteRecordRaw> = [
     path: "/logout",
     component: () => import("../vue/Logout.vue"),
   },
+  {
+    path: "/mypage",
+    component: () => import("../vue/Mypage.vue"),
+  },
 ];
 
 const router = createRouter({

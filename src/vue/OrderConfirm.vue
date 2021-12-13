@@ -180,7 +180,7 @@
             type="radio"
             name="payment"
             v-model="paymentMethod"
-            value="cash"
+            value="1"
             v-on:change="openCredit"
             checked
           /><span>現金払い</span>
@@ -190,7 +190,7 @@
             type="radio"
             name="payment"
             v-model="paymentMethod"
-            value="credit"
+            value="2"
             v-on:change="openCredit"
           /><span>クレジットカード</span>
         </label>
@@ -205,7 +205,12 @@
             <div class="input-field col s10">
               <div class="error">{{ cardNumberError }}</div>
               <label for="cardNumber">カード番号：</label>
-              <input type="text" v-model="cardNumber" id="cardNumber" />
+              <input
+                type="text"
+                v-model="cardNumber"
+                id="cardNumber"
+                maxlength="16"
+              />
             </div>
             <div class="select-field col s10">
               <div class="error">{{ cardExpError }}</div>
@@ -246,12 +251,17 @@
             <div class="input-field col s10">
               <div class="error">{{ cardNameError }}</div>
               <label for="cardName">カード名義</label>
-              <input type="text" id="cardName" v-model="cardName" />
+              <input
+                type="text"
+                id="cardName"
+                v-model="cardName"
+                maxlength="50"
+              />
             </div>
             <div class="input-field col s10">
               <div class="error">{{ cvvError }}</div>
               <label for="css">セキュリティーコード</label>
-              <input type="text" id="css" v-model="cvv" />
+              <input type="text" id="css" v-model="cvv" maxlength="4" />
             </div>
           </div>
         </div>
@@ -288,8 +298,10 @@ import { useStore } from "vuex";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import addHours from "date-fns/esm/addHours";
-import { User } from "@/types/user";
-import { ca } from "date-fns/locale";
+import { format } from "date-fns";
+
+// import { User } from "@/types/user";
+// import { ca } from "date-fns/locale";
 // import { User } from "../types/user";
 
 export default defineComponent({
@@ -336,10 +348,6 @@ export default defineComponent({
     const deliveryTime = ref("");
     //クレジット決済情報画面
     const isCredit = ref(false);
-    //現金払い
-    const cash = ref("");
-    //クレジット払い
-    const credit = ref("");
     //クレジットカード番号
     const cardNumber = ref("");
     //クレジットカード番号のエラー
@@ -361,7 +369,11 @@ export default defineComponent({
     //カード情報不正エラー
     const creditCardError = ref("");
     //支払い方法
-    const paymentMethod = ref("cash");
+    const paymentMethod = ref("1");
+    //支払いステータス
+    const status = ref("");
+    //配達日時のフォーマット
+    const formatDeliveryTime = ref("");
 
     //カートに入っている商品情報をストアから取得
     const getCurrentCartItem = () => {
@@ -390,9 +402,9 @@ export default defineComponent({
 
     //クレジット決済画面表示
     const openCredit = () => {
-      if (paymentMethod.value === "credit") {
+      if (paymentMethod.value === "2") {
         isCredit.value = true;
-      } else if (paymentMethod.value === "cash") {
+      } else if (paymentMethod.value === "1") {
         isCredit.value = false;
         return;
       }
@@ -431,7 +443,6 @@ export default defineComponent({
     };
     //日付情報を取得
     const getDate = () => {
-      console.log("getDate呼ばれた");
       let deliveryDates = new Date(deliveryDate.value);
       let daliveryDateTime = new Date(
         deliveryDates.getFullYear(),
@@ -455,14 +466,12 @@ export default defineComponent({
      * 注文を確定するボタンをクリック
      */
     const openModal = async (): Promise<void> => {
-      console.log("クレジット決済呼ばれる");
       //エラーがあれば先に進まない
       if (hasError()) {
         return;
       }
       //クレジットカード決済
-      if (paymentMethod.value === "credit") {
-        console.log("クレジット決済呼ばれる２２２２２２２");
+      if (paymentMethod.value === "2") {
         let loginUser = store.getters.getUserAddress;
         const responce = await axios.post(
           "http://153.127.48.168:8080/sample-credit-card-web-api/credit-card/payment",
@@ -478,10 +487,15 @@ export default defineComponent({
         );
         console.dir("responce:" + JSON.stringify(responce));
         if (responce.data.status === "error") {
-          console.log("エラー表示");
           creditCardError.value = "クレジットカード情報が不正です";
           return;
         }
+      }
+
+      if (paymentMethod.value === "1") {
+        status.value = "1";
+      } else if (paymentMethod.value === "2") {
+        status.value = "2";
       }
 
       //入力した日付情報を取得
@@ -500,12 +514,58 @@ export default defineComponent({
         errorDeliveryDate.value = "今から３時間後の時間を指定してください";
         return;
       }
+
+      formatDeliveryTime.value = format(
+        daliveryDateTime,
+        "yyyy/MM/dd HH:mm:ss"
+      );
+
       //注文完了画面に画面遷移する
       showContent.value = true;
     };
 
     //モーダル画面から注文完了画面に遷移
-    const onOrder = () => {
+    const onOrder = async (): Promise<void> => {
+      let loginUser = store.getters.getUserAddress;
+      //注文リスト
+      let orderItemFormList = [];
+      for (let orderItem of currentCartItems.value) {
+        //注文リストに渡すトッピングリスト
+        let orderToppingFormList = [];
+        for (let topping of orderItem.orderToppingList) {
+          orderToppingFormList.push({ toppingId: topping._toppingId });
+        }
+        orderItemFormList.push({
+          itemId: orderItem.itemId,
+          quantity: orderItem.quantity,
+          size: orderItem.size,
+          orderToppingFormList: orderToppingFormList,
+        });
+      }
+
+      //WEB APIに注文リストを渡す
+      const responce = await axios.post(
+        `http://153.127.48.168:8080/ecsite-api/order`,
+        {
+          userId: loginUser.id,
+          status: status.value,
+          totalPrice: totalPriceInTax.value,
+          destinationName: distinationName.value,
+          destinationEmail: distinationMail.value,
+          destinationZipcode: zipcode.value,
+          destinationAddress: address.value,
+          destinationTel: distinationTel.value,
+          deliveryTime: formatDeliveryTime.value,
+          paymentMethod: paymentMethod.value,
+          orderItemFormList: orderItemFormList,
+        }
+      );
+      console.dir("responce:" + JSON.stringify(responce));
+
+      //カートの中身を空にする
+      store.commit("emptyCart");
+      store.getters.getEmptyCart;
+      //注文完了画面に遷移する
       router.push("/orderFinished");
     };
 
@@ -630,8 +690,6 @@ export default defineComponent({
       deliveryDate,
       deliveryTime,
       openCredit,
-      credit,
-      cash,
       isCredit,
       cardNumber,
       cardExpMonth,
