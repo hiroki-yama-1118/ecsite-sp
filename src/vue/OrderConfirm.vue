@@ -112,6 +112,7 @@
                 type="date"
                 id="deliveryDate"
                 v-model="deliveryDate"
+                class="datepicker"
               /><label for="deliveryDate"> 配達日時：</label>
             </div>
             <div>

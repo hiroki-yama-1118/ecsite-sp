@@ -46,6 +46,30 @@ export class OrderItem {
       return itemSubTotal + toppingSubTotal;
     }
   }
+  get calcSubTotalUpdateItemPrice(): number {
+    if (this.size === "M") {
+      const itemSubTotal = this.item.priceM * this.quantity;
+      return itemSubTotal;
+    } else {
+      const itemSubTotal = this.item.priceL * this.quantity;
+      return itemSubTotal;
+    }
+  }
+  get calcSubTotalUpdateToppingPrice(): number {
+    if (this.size === "M") {
+      const toppingSubTotal =
+        this.orderToppingList[0].topping.priceM *
+        this.quantity *
+        this.orderToppingList.length;
+      return toppingSubTotal;
+    } else {
+      const toppingSubTotal =
+        this.orderToppingList[0].topping.priceL *
+        this.quantity *
+        this.orderToppingList.length;
+      return toppingSubTotal;
+    }
+  }
 
   public get id(): number {
     return this._id;

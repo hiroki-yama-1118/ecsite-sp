@@ -58,27 +58,35 @@
             ><input type="text" id="tel" v-model="tel" />
           </div>
           <div class="row">
-            <div class="input-field col s12">
-              <div class="error">
-                {{ passError }}
-              </div>
-              <label for="pass"> パスワード：</label
-              ><input type="password" id="pass" v-model="pass" />
-            </div>
-            <div class="row">
-              <div class="input-field col s12">
-                <div class="error">
-                  {{ rePassError }}
+            <form>
+              <div class="row">
+                <div class="input-field col s12">
+                  <div class="error">
+                    {{ passError }}
+                  </div>
+                  <label for="pass"> パスワード：</label
+                  ><input type="password" id="pass" v-model="pass" />
                 </div>
-                <label for="rePass"> 確認用パスワード：</label
-                ><input type="password" id="rePass" v-model="rePass" />
+                <div class="row">
+                  <div class="input-field col s12">
+                    <div class="error">
+                      {{ rePassError }}
+                    </div>
+                    <label for="rePass"> 確認用パスワード：</label
+                    ><input type="password" id="rePass" v-model="rePass" />
+                  </div>
+                </div>
+                <div class="error">
+                  {{ registerError }}
+                </div>
+                <button type="button" class="btn" v-on:click="admin">
+                  登録
+                </button>
+                <button type="button" class="btn" v-on:click="clear">
+                  クリア
+                </button>
               </div>
-            </div>
-            <div class="error">
-              {{ registerError }}
-            </div>
-            <button type="button" class="btn" v-on:click="admin">登録</button>
-            <button type="button" class="btn" v-on:click="clear">クリア</button>
+            </form>
           </div>
         </div>
       </div>

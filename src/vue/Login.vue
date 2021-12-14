@@ -9,15 +9,22 @@
               <div>{{ missError }}</div>
             </div>
             <div class="row">
-              <div class="input-field col s12">
-                <div class="error">{{ mailError }}</div>
-                <input type="email" id="mail" v-model="mailAddress" />
-                <label for="mail">メールアドレス：</label>
+              <div class="error">{{ mailError }}</div>
+              <div class="input-field col s10">
+                <i class="material-icons prefix">account_circle</i>
+                <input
+                  type="email"
+                  id="icon_prefix"
+                  class="validate"
+                  v-model="mailAddress"
+                />
+                <label for="icon_prefix">メールアドレス：</label>
               </div>
             </div>
             <div class="row">
-              <div class="input-field col s12">
-                <div class="error">{{ passError }}</div>
+              <div class="error">{{ passError }}</div>
+              <div class="input-field col s10">
+                <i class="material-icons prefix">phone</i>
                 <input type="password" id="password" v-model="passWord" /><label
                   for="password"
                 >

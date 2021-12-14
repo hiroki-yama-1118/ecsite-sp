@@ -27,6 +27,7 @@
                 <th class="table-title">商品名</th>
                 <th class="table-title">サイズ・価格・数量</th>
                 <th class="table-title">トッピング・価格</th>
+                <th class="table-title">数量変更</th>
                 <th class="table-title">小計</th>
               </tr>
             </thead>
@@ -95,6 +96,7 @@ import { defineComponent, ref } from "vue";
 import { OrderItem } from "../types/orderItem";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import { Item } from "../types/item";
 export default defineComponent({
   setup() {
     //storeを使用するため
@@ -109,6 +111,22 @@ export default defineComponent({
     let currentCartItems = ref(Array<OrderItem>());
     //ショッピングカート内の有無
     const noItem = ref(false);
+    //数量変更
+    const quantity = ref(1);
+    //Itemオブジェクト作成
+    const currentItem = ref(
+      new Item(
+        0,
+        "XXXX",
+        "XXXX",
+        "XXXX",
+        0,
+        0,
+        "/img_noodle/noImage.png",
+        true,
+        []
+      )
+    );
 
     //カートに入っている商品情報をストアから取得
     const getCurrentCartItem = () => {
@@ -164,6 +182,7 @@ export default defineComponent({
       onGoOrder,
       onDeleteItem,
       noItem,
+      quantity,
     };
   },
 });
