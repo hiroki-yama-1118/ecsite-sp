@@ -59,6 +59,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.container {
+  margin-bottom: 100px;
+}
 .items {
   display: flex;
   flex-wrap: wrap;

@@ -36,7 +36,7 @@
               >
                 {{ formatDeliveryTime(order.deliveryTime) }}
                 <span>にお届け予定</span>
-                <span>
+                <span class="cancel">
                   <button
                     type="button"
                     class="btn"
@@ -152,6 +152,7 @@ export default defineComponent({
 <style scoped>
 .container {
   background-color: antiquewhite;
+  margin-bottom: 100px;
 }
 .user-info {
   background-color: aliceblue;
@@ -165,5 +166,8 @@ export default defineComponent({
 }
 .text-center {
   text-align: center;
+}
+.cancel {
+  margin: 20px;
 }
 </style>

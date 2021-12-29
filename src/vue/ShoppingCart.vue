@@ -43,7 +43,7 @@
                   <div class="item-name">{{ currentCartItem.item.name }}</div>
                 </td>
                 <td class="size-price-quantity">
-                  {{ currentCartItem.size }}：
+                  {{ currentCartItem.size }}:
                   {{ currentCartItem.itemPrice.toLocaleString() }}円
                   {{ currentCartItem.quantity }}個
                 </td>
@@ -54,7 +54,7 @@
                     class="topping-price"
                   >
                     <li class="text-center">
-                      {{ topping.topping.name }}：
+                      {{ topping.topping.name }}:
                       {{ currentCartItem.toppingPrice.toLocaleString() }}円
                     </li>
                   </div>
@@ -78,7 +78,7 @@
           </table>
         </div>
         <div class="row cart-table-price" v-if="!noItem">
-          <div>消費税：{{ taxPrice.toLocaleString() }}円</div>
+          <div>消費税:{{ taxPrice.toLocaleString() }}円</div>
           <div>ご注文金額合計{{ totalPriceInTax.toLocaleString() }}円</div>
         </div>
         <div class="row order-confirm-btn" v-if="!noItem">
@@ -96,7 +96,7 @@ import { defineComponent, ref } from "vue";
 import { OrderItem } from "../types/orderItem";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { Item } from "../types/item";
+// import { Item } from "../types/item";
 export default defineComponent({
   setup() {
     //storeを使用するため
@@ -114,19 +114,19 @@ export default defineComponent({
     //数量変更
     const quantity = ref(1);
     //Itemオブジェクト作成
-    const currentItem = ref(
-      new Item(
-        0,
-        "XXXX",
-        "XXXX",
-        "XXXX",
-        0,
-        0,
-        "/img_noodle/noImage.png",
-        true,
-        []
-      )
-    );
+    // const currentItem = ref(
+    //   new Item(
+    //     0,
+    //     "XXXX",
+    //     "XXXX",
+    //     "XXXX",
+    //     0,
+    //     0,
+    //     "/img_noodle/noImage.png",
+    //     true,
+    //     []
+    //   )
+    // );
 
     //カートに入っている商品情報をストアから取得
     const getCurrentCartItem = () => {

@@ -281,7 +281,6 @@ export default defineComponent({
   background-color: yellow;
   margin: auto;
   width: 500px;
-  border-radius: 50%;
   color: red;
 }
 .item-hedding {
@@ -318,7 +317,6 @@ export default defineComponent({
   display: table-cell;
   vertical-align: middle;
   background-color: whitesmoke;
-  border-radius: 5%;
 }
 .item-topping {
   display: inline;
